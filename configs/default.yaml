@@ -1,0 +1,27 @@
+# DL-051 LoRA — default experiment configuration.
+# Every value here is mirrored as a CLI default in src/train.py; run
+# `python -m src.train --from-config ...` to force these dataset-scale values.
+
+experiment:
+  model_name: distilbert-base-uncased   # fresh pretrained weights per run
+  dataset: "GLUE SST-2 via HF (nyu-mll/glue, config=sst2)"
+  subset_size: 4000        # training examples (of 67,349); identical for ALL methods
+  epochs: 2
+  batch_size: 16
+  max_len: 128             # matches the paper's RoBERTa GLUE sequence length
+  weight_decay: 0.01
+  seed: 42                 # single seed (documented limitation)
+  label_mapping: {0: negative, 1: positive}
+
+lora:
+  r: [2, 4, 8]             # primary ablation: rank
+  alpha_rule: "alpha = 2 * r"   # documented consistent rule -> alpha/r = 2
+  targets: [q_lin, v_lin]  # query & value projections, per the paper
+  lora_dropout: 0.0
+
+learning_rates:
+  full: 2.0e-5             # full fine-tuning LR
+  lora: 1.0e-3             # adapter LR (adapters + head)
+
+metrics: [val_acc, total_params, trainable_params, trainable_pct,
+          train_time_sec, peak_gpu_mem_mib]

@@ -1,0 +1,12 @@
+# Pinned to the versions this project was developed and run with.
+# Local runs used Python 3.11; Colab (T4) ships compatible versions.
+torch>=2.2
+transformers>=4.40
+datasets>=2.19
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+PyYAML>=6.0
+pytest>=8.0
+jupyter>=1.0
+nbformat>=5.9
