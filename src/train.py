@@ -163,8 +163,10 @@ def run_experiment(
         ep_time = time.time() - ep_start
 
         row = {
-            "run_name": run_name, "method": method, "rank": rank,
-            "alpha": alpha, "epoch": epoch,
+            "run_name": run_name, "method": method,
+            "rank": rank if method == "lora" else "",
+            "alpha": alpha if method == "lora" else "",
+            "epoch": epoch,
             "train_loss": round(train_loss, 4), "train_acc": round(train_acc, 4),
             "val_loss": round(val["val_loss"], 4), "val_acc": round(val["val_acc"], 4),
             "epoch_time_sec": round(ep_time, 1),
