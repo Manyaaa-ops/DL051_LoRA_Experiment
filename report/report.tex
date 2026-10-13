@@ -35,7 +35,9 @@ model's \TpFULL{} parameters (\TrainpcFULL{}\%) versus only \TrainpRFOUR{}
 parameters (\TrainpcRFOUR{}\%) for LoRA $r{=}4$, while reaching \ValFULL{}
 (full FT) versus \ValRFOUR{} (LoRA $r{=}4$) SST-2 validation
 accuracy. Peak measured device memory and training time are reported from the
-same runs. We carefully distinguish results reported in the original paper
+same runs. An identical re-run on a Google Colab T4 GPU confirms every
+conclusion (accuracies within \MaxDeltaT{} points, with exact CUDA memory
+accounting). We carefully distinguish results reported in the original paper
 (RoBERTa/GPT-3 scale) from our reduced-scale adaptation, and we state the
 limitations of a single-seed, subset, CPU/GPU-local study.
 \end{abstract}
@@ -200,11 +202,12 @@ assignment; we do not claim optimality.
 
 \textbf{Metrics.} Validation accuracy, total/trainable parameter counts (from
 the actual model object), trainable percentage, wall-clock training time, and
-peak allocated device memory via PyTorch allocator statistics. Our local
-machine has no CUDA device; runs used \DeviceName{} (Apple-silicon GPU), and
-peak memory there is sampled per training batch
-(\texttt{torch.mps.current\_allocated\_memory}); on CUDA the notebook records
-the exact \texttt{max\_memory\_allocated}. No CUDA number is ever invented.
+peak allocated device memory via PyTorch allocator statistics. The primary
+runs used \DeviceName{} (Apple-silicon GPU), where peak memory is sampled per
+training batch (\texttt{torch.mps.current\_allocated\_memory}); the identical
+protocol was additionally executed on a Google Colab T4 GPU, where peak memory
+is the exact \texttt{torch.cuda.max\_memory\_allocated} (\cref{sec:t4}). No
+CUDA number is ever invented; every T4 figure comes from that logged run.
 
 \section{Results}
 \label{sec:results}
@@ -281,6 +284,40 @@ batch on \DeviceName{}).}
 \label{fig:time}
 \end{figure}
 
+\subsection{Cross-device Confirmation on a Colab T4 GPU}
+\label{sec:t4}
+To test whether the conclusions depend on the local accelerator, we re-ran
+the identical protocol (same subset indices, seed, and hyperparameters) on a
+Google Colab T4 GPU through the project notebook; \cref{tab:t4} summarises
+the measured results. Accuracies agree with the primary device within
+\MaxDeltaT{} points (\ValTFULL{} vs.\ \ValFULL{} for full fine-tuning;
+\ValTRFOUR{} vs.\ \ValRFOUR{} for LoRA $r{=}4$), and the parameter counts
+and adapter sizes are identical, as they must be---they are properties of the
+model, not of the device. The T4 memory figure is the exact CUDA allocator
+peak: \MemTFULL{}\,MiB for full fine-tuning versus \MemTRFOUR{}\,MiB for
+LoRA, a $\MemRatioT\times$ reduction, which is a cleaner version of the
+sampled $\sim\!4\times$ gap on \DeviceName. Wall-clock confirms the same
+trend (\TimeTFULL{} vs.\ \TimeTRFOUR{}\,min). Notably, the T4 rank sweep
+reproduces the flat, noisy rank--accuracy relation: $r{=}4$ peaked at epoch 1
+(\ValTRFOUR) and degraded during epoch 2, illustrating the single-seed noise
+level discussed in \cref{sec:discussion}.
+
+\begin{table}[t]
+\centering
+\caption{Cross-device confirmation: identical protocol re-run on a Google
+Colab T4 GPU (measured; generated from
+\texttt{results/colab\_t4/results.csv}).}
+\label{tab:t4}
+\small
+\begin{tabular}{lrrrr}
+\hline
+Method & Val acc & Train & Peak mem & Time \\
+ & (best) & params & (MiB) & (min) \\
+\hline
+\input{generated/table_results_t4.tex}
+\end{tabular}
+\end{table}
+
 \section{Comparison with the Original Paper}
 \label{sec:paper}
 It is essential to separate three things: what the paper \emph{reports}, what we
@@ -355,9 +392,10 @@ is not free}: the frozen backbone must still be loaded, forwarded, and stored;
 at our scale (66M parameters) the trainable parameters are a rounding error
 next to activations, so peak memory does not collapse by the trainable-parameter
 factor---matching the paper's caveat that the pretrained model is still needed
-for deployment. (iv)~\emph{Device}: local runs used \DeviceName{} rather than
-the assignment's reference Colab T4; absolute times and memory figures are
-device-specific, and the notebook reproduces the same protocol on CUDA. (v)~\emph{Hyperparameters}:
+for deployment. (iv)~\emph{Device}: the primary runs used \DeviceName{} rather than the
+assignment's reference Colab T4; a full re-run on the T4 (\cref{sec:t4})
+shows the conclusions transfer across accelerators, but absolute times and
+memory figures remain device-specific. (v)~\emph{Hyperparameters}:
 the LoRA learning rate ($10^{-3}$) is much larger than the full-FT rate
 ($2\times10^{-5}$) by design (adapters train from scratch), so the comparison
 is ``best practice per method'' rather than a controlled LR sweep.

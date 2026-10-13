@@ -137,6 +137,23 @@ fp32, AdamW. Peak memory = allocator statistics (sampled per batch on MPS).
   backbone and activations dominate, so the drop is ~4×, not ~100×.
 * All LoRA runs verified bit-identical frozen backbone weights after training.
 
+### Cross-device confirmation — Google Colab T4 (identical protocol)
+
+Re-run through `notebooks/DL051_LoRA_Experiment.ipynb` on a T4 GPU; archived
+in `results/colab_t4/` (same subset indices, seed, and hyperparameters):
+
+| Run | Best val acc | Peak mem (MiB) | Train time (min) |
+|---|---:|---:|---:|
+| Full fine-tuning | 89.11 % | 1665 | 3.4 |
+| LoRA r=2 (α=4)  | 88.42 % | 743 | 2.3 |
+| LoRA r=4 (α=8)  | 88.76 % | 744 | 2.3 |
+| LoRA r=8 (α=16) | 86.70 % | 745 | 2.3 |
+
+Every accuracy agrees with the Apple-silicon run within 1.2 points, and the
+memory gap is 2.2× with exact CUDA allocator accounting — the conclusions do
+not depend on the accelerator. The T4 rank sweep also reproduces the flat,
+noisy rank--accuracy relation (r=4 peaked at epoch 1 and degraded in epoch 2).
+
 ## Comparison with the paper (distinctly different settings!)
 
 The paper reports, e.g., **RoBERTa-large on GLUE**: 355.0M full-FT parameters

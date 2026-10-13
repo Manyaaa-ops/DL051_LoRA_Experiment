@@ -1,0 +1,5 @@
+run_name,method,rank,alpha,best_val_acc,best_epoch,final_val_acc,total_params,trainable_params,trainable_pct,lora_params,train_time_sec,peak_gpu_mem_mib,frozen_backbone_verified,subset_size,epochs,batch_size,max_len,lr,seed,device,model_name,dataset,adapter_checkpoint_bytes,timestamp
+full,full,,,0.8911,2,0.8911,66955010,66955010,100.0,0,205.7,1665.2,n/a (full FT trains backbone),8000,2,16,128,2e-05,42,cuda,distilbert-base-uncased,GLUE SST-2 (nyu-mll/glue),0,2026-10-13T22:02:29
+lora_r2_a4,lora,2,4.0,0.8842,2,0.8842,66991874,628994,0.9389,36864,139.2,743.3,True,8000,2,16,128,0.001,42,cuda,distilbert-base-uncased,GLUE SST-2 (nyu-mll/glue),2526201,2026-10-13T22:04:59
+lora_r4_a8,lora,4,8.0,0.8876,1,0.8612,67028738,665858,0.9934,73728,139.1,743.9,True,8000,2,16,128,0.001,42,cuda,distilbert-base-uncased,GLUE SST-2 (nyu-mll/glue),2673657,2026-10-13T22:07:29
+lora_r8_a16,lora,8,16.0,0.867,2,0.867,67102466,739586,1.1022,147456,139.3,745.1,True,8000,2,16,128,0.001,42,cuda,distilbert-base-uncased,GLUE SST-2 (nyu-mll/glue),2968569,2026-10-13T22:09:59

@@ -100,6 +100,34 @@ def main() -> int:
         check(f"{r}: config.json saved",
               os.path.exists(os.path.join(ROOT, "results", "runs", r, "config.json")))
 
+    # ---- optional cross-device (Colab T4) confirmation ------------------
+    t4_path = os.path.join(ROOT, "results", "colab_t4", "results.csv")
+    if os.path.exists(t4_path):
+        print("[validate] Colab T4 confirmation run")
+        t4 = pd.read_csv(t4_path).drop_duplicates(subset=["run_name"], keep="last")
+        t = t4.set_index("run_name")
+        check("t4: all 4 runs present", set(RUNS) <= set(t.index),
+              f"missing={set(RUNS) - set(t.index)}")
+        check("t4: device is cuda", set(t4["device"].astype(str)) == {"cuda"},
+              f"values={set(t4['device'])}")
+        check("t4: protocol matches main run",
+              int(t4["subset_size"].iloc[0]) == int(d.loc[RUNS[0], "subset_size"])
+              and int(t4["epochs"].iloc[0]) == int(d.loc[RUNS[0], "epochs"]),
+              f"subset={t4['subset_size'].iloc[0]} epochs={t4['epochs'].iloc[0]}")
+        t4log_path = os.path.join(ROOT, "results", "colab_t4", "experiment_log.csv")
+        t4log = pd.read_csv(t4log_path) if os.path.exists(t4log_path) else None
+        for r in RUNS:
+            if r not in t.index:
+                continue
+            acc = float(t.loc[r, "best_val_acc"])
+            check(f"t4 {r}: val acc in (0,1)", 0 < acc < 1, f"acc={acc}")
+            check(f"t4 {r}: params match main run",
+                  int(t.loc[r, "trainable_params"]) == int(d.loc[r, "trainable_params"]))
+            if t4log is not None:
+                best = t4log[t4log["run_name"] == r]["val_acc"].astype(float).max()
+                check(f"t4 {r}: best_val_acc matches log",
+                      abs(best - acc) < 1e-4, f"csv={acc} log={best:.4f}")
+
     print(f"[validate] {len(fails)} failure(s)" if fails else "[validate] ALL CHECKS PASSED")
     return 1 if fails else 0
 

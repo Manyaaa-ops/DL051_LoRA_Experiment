@@ -111,7 +111,10 @@ LoRA $r{=}8$ & \TrainpREIGHT & \TrainpcREIGHT\% & \ValREIGHT & \TimeREIGHT \\
 \vspace{1em}
 \small Values measured in this project (see \texttt{results/results.csv});
 paper's RoBERTa-large SST-2: 96.4 (full) vs $96.2{\pm}0.5$ (LoRA $r{=}4$) ---
-different model/data, so compare the \emph{pattern}, not the numbers.
+different model/data, so compare the \emph{pattern}, not the numbers.\
+\textbf{Cross-device confirmation} (Google Colab T4, identical protocol):
+full \ValTFULL{} vs LoRA $r{=}4$ \ValTRFOUR{} at 0.99\% trainable; peak mem
+\MemTFULL\,MiB vs \MemTRFOUR\,MiB ($2.2\times$).
 \end{frame}
 
 % 7 -----------------------------------------------------------------------
