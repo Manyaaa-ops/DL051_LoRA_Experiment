@@ -70,9 +70,9 @@ Gradients exist only for trainable parameters; AdamW keeps two fp32 buffers per
 trainable parameter. Full FT: 2 × 67M × 4 B ≈ 536 MB of optimizer state just
 for DistilBERT. LoRA r=4: 2 × 665,858 × 4 B ≈ 5.3 MB total, of which the
 adapters alone are 2 × 73,728 × 4 B ≈ 0.6 MB (the rest is the trainable
-head). Activations and the frozen weights remain, so peak memory falls much
-less than 100× (measured ~4×: 1027 vs 265 MiB — we report the measured peak
-honestly).
+head). Activations and the frozenweights remain, so peak memory falls much less than 100× (measured ~4× on
+Apple MPS: 1027 vs 265 MiB; 2.2× on the Colab T4 with exact CUDA accounting:
+1665 vs 744 MiB — we report the measured peak honestly).
 
 **Q10. Full fine-tuning vs parameter-efficient fine-tuning (PEFT)?**
 Full FT: all parameters trainable, one full model copy per task. PEFT (LoRA is
@@ -107,8 +107,8 @@ not a specific paper row.
 
 **Q14. What exactly is the protocol, and what did we change vs the paper?**
 Change vs paper: model (DistilBERT vs RoBERTa-large/GPT-3), data (seeded subset
-of \SubsetSize{} of 67,349 vs full data), epochs (2), seed (single), device
-(Apple GPU locally / Colab T4 via notebook), α = 2r rule. Held fixed across
+of \SubsetSize{} of 67,349 vs full data), epochs (2), seed (single), devices
+(primary Apple GPU + confirmation Colab T4, both measured), α = 2r rule. Held fixed across
 conditions: checkpoint, subset indices (persisted to JSON), batch 16, seq 128,
 evaluation (validation accuracy, best epoch), optimizer family.
 
@@ -130,6 +130,8 @@ max_memory_allocated() after — allocated *tensor* memory, not total process
 memory. Same GPU, batch size, precision, seq length across runs. On Apple MPS
 (local machine) there is no peak-stats API in our torch build, so we sample
 current_allocated_memory() per batch and take the max — documented as sampled.
+The Colab T4 re-run records the exact CUDA peak: 1665 MiB (full FT) vs
+744 MiB (LoRA r=4), a 2.2× gap, confirming the sampled MPS picture.
 
 **Q18. Why is the LoRA learning rate 1e-3 while full FT uses 2e-5?**
 Adapters (and their random-init path) train from scratch, like newly
@@ -147,8 +149,9 @@ fixed; subset indices are persisted; the notebook reruns everything on Colab.
 ## Extensions and critique
 
 **Q20. What are the limitations of this experiment?**
-Single seed; subset of the data; 2 epochs; validation-as-test; local device is
-Apple GPU not T4; no secondary ablation of α or placement; DistilBERT is small
+Single seed; subset of the data; 2 epochs; validation-as-test; primary device
+is Apple GPU (a full Colab T4 re-run confirms every conclusion, but absolute
+numbers stay device-specific); no secondary ablation of α or placement; DistilBERT is small
 enough that memory savings are dominated by the frozen backbone + activations.
 
 **Q21. How would you extend to GPT-2?**

@@ -153,8 +153,8 @@ full \ValTFULL{} vs LoRA $r{=}4$ \ValTRFOUR{} at 0.99\% trainable; peak mem
       between ranks are within noise --- we do not over-interpret them.
 \item Validation split used for evaluation AND best-epoch selection (GLUE test
       labels are withheld).
-\item Local device is \DeviceName{}, not the target Colab T4: absolute
-      memory/time figures are device-specific (notebook reproduces on CUDA).
+\item Primary device is \DeviceName{}; the Colab T4 re-run confirms all
+      conclusions, but absolute memory/time figures stay device-specific.
 \item DistilBERT + SST-2 is an \emph{adaptation} of the paper's principle ---
       the paper reports RoBERTa/GPT-2/GPT-3, never DistilBERT.
 \item No secondary ablation (placement / $\alpha$ rule) -- main experiments
