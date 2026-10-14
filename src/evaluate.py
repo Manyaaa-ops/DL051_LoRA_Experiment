@@ -49,6 +49,7 @@ def format_results_table(rows: List[Dict[str, Any]]) -> str:
     cols = [
         ("run_name", "run", "s"), ("method", "method", "s"),
         ("rank", "rank", "s"), ("best_val_acc", "val_acc", "f"),
+        ("total_params", "total", "d"),
         ("trainable_params", "trainable", "d"), ("trainable_pct", "t%", "f"),
         ("peak_gpu_mem_mib", "gpu_MiB", "f"), ("train_time_sec", "time_s", "f"),
     ]
@@ -60,7 +61,9 @@ def format_results_table(rows: List[Dict[str, Any]]) -> str:
         cells = []
         for key, _, kind in cols:
             v = r.get(key, "")
-            if v in ("", None) or (isinstance(v, str) and v.lower() == "nan"):
+            if (v in ("", None)
+                    or (isinstance(v, str) and v.lower() == "nan")
+                    or (isinstance(v, float) and v != v)):
                 v = "n/a"
             fmt = (f"{{:>{10}}}" if kind != "s" else f"{{:<{12}}}")
             if kind == "f" and isinstance(v, (int, float)):
