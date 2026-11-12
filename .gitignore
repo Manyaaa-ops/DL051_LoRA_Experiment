@@ -24,3 +24,6 @@ wandb/
 
 # OS noise
 .DS_Store
+
+# Heavy training checkpoints (reproducible from code+config; results.csv/logs contain all metrics)
+results/runs/
