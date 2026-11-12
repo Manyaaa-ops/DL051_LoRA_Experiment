@@ -42,7 +42,7 @@ accounting). We carefully distinguish results reported in the original paper
 limitations of a single-seed, subset, CPU/GPU-local study.
 \end{abstract}
 
-\section{Introduction and Motivation}
+\section{Problem & Motivation}
 Pretraining large Transformers on generic corpora and fine-tuning them on
 downstream tasks is the dominant paradigm in NLP~\cite{devlin2019bert}. Full
 fine-tuning, however, updates \emph{every} pretrained parameter and, for each
@@ -72,7 +72,7 @@ parameter, memory, and wall-clock costs (\cref{sec:ablation}); and (4)~an
 honest comparison against the original paper's reported numbers, including
 where our setting differs (\cref{sec:paper}).
 
-\section{Background and Mathematical Formulation}
+\section{Method in Your Own Words with Key Equations}
 \label{sec:method}
 Let $W_0\in\mathbb{R}^{d\times k}$ be a pretrained weight matrix (e.g.\ a query
 projection) whose input is $x\in\mathbb{R}^{k}$, so the pretrained layer
@@ -133,7 +133,7 @@ has exactly the architecture of the original model and incurs no additional
 inference latency, and only the small adapter needs to be stored per
 task~\cite{hu2022lora}.
 
-\section{Implementation}
+\section{Implementation Details}
 \label{sec:impl}
 Our implementation lives in \texttt{src/lora.py} and uses only standard PyTorch
 building blocks; no \texttt{peft} or other adapter library is used to implement
@@ -209,7 +209,7 @@ protocol was additionally executed on a Google Colab T4 GPU, where peak memory
 is the exact \texttt{torch.cuda.max\_memory\_allocated} (\cref{sec:t4}). No
 CUDA number is ever invented; every T4 figure comes from that logged run.
 
-\section{Results}
+\section{Results vs Paper}
 \label{sec:results}
 \cref{tab:results} summarises the four measured runs; all values are generated
 from \texttt{results.csv} by \texttt{scripts/report\_tables.py}.
@@ -348,7 +348,7 @@ $r=1/2/4/8/64$---i.e.\ essentially flat in $r$), our rank sweep tests whether
 accuracy saturates at small ranks in a classification setting two orders of
 magnitude smaller.
 
-\section{Ablation: Rank}
+\section{Ablation}
 \label{sec:ablation}
 Rank is the primary ablation: $r \in \{2,4,8\}$ with $\alpha = 2r$ so the scale
 factor $\alpha/r$ is constant. Parameter-count theory predicts an exact linear
@@ -379,7 +379,7 @@ Run & Ep & Tr loss & Tr \% & Va loss & Va \% & Min \\
 \end{tabular}
 \end{table}
 
-\section{Discussion, Failure Cases, and Limitations}
+\section{Failure Cases / What Didn't Work}
 \label{sec:discussion}
 \textbf{Failure cases and threats to validity.}
 (i)~\emph{Noise}: with \SubsetSize{} examples and a single seed, differences of
